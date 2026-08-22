@@ -34,6 +34,11 @@ migrate_working_dir/
 /coverage/
 /artifacts/
 
+# Release signing material must never be committed.
+/android/key.properties
+*.jks
+*.keystore
+
 # Symbolication related
 app.*.symbols
 

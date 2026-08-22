@@ -18,24 +18,23 @@ class CentralApiException implements Exception {
 
 class CentralApi {
   static const baseUrl = 'https://api.zerotier.com/api/v1';
+  static const _minimumAccountRequestSpacing = Duration(milliseconds: 60);
   final Dio _dio;
 
-  CentralApi(String token, {Dio? dio})
-    : _dio =
-          dio ??
-          Dio(
-            BaseOptions(
-              baseUrl: baseUrl,
-              connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: const Duration(seconds: 20),
-              sendTimeout: const Duration(seconds: 10),
-              headers: {
-                HttpHeaders.authorizationHeader: 'token ${token.trim()}',
-                HttpHeaders.acceptHeader: 'application/json',
-                HttpHeaders.contentTypeHeader: 'application/json',
-              },
-            ),
-          );
+  CentralApi(String token, {Dio? dio}) : _dio = dio ?? Dio() {
+    _dio.options
+      ..baseUrl = baseUrl
+      ..connectTimeout = const Duration(seconds: 10)
+      ..receiveTimeout = const Duration(seconds: 20)
+      ..sendTimeout = const Duration(seconds: 10)
+      ..followRedirects = false
+      ..maxRedirects = 0
+      ..headers.addAll({
+        HttpHeaders.authorizationHeader: 'token ${token.trim()}',
+        HttpHeaders.acceptHeader: 'application/json',
+        HttpHeaders.contentTypeHeader: 'application/json',
+      });
+  }
 
   Future<void> validateToken() async {
     try {
@@ -101,7 +100,9 @@ class CentralApi {
 
     // Legacy free accounts are limited to 20 requests per second. Loading
     // member lists sequentially keeps refreshes comfortably below that limit.
-    for (final network in networks) {
+    for (var index = 0; index < networks.length; index++) {
+      if (index > 0) await Future<void>.delayed(_minimumAccountRequestSpacing);
+      final network = networks[index];
       membersByNetwork[network.id] = await listMembers(network.id);
     }
     return AccountSnapshot(
@@ -132,7 +133,7 @@ class CentralApi {
       );
       final payload = response.data;
       if (payload is Map) {
-        return NetworkMember.fromJson(_map(payload));
+        return member.mergeJson(_map(payload));
       }
       // Some compatible Legacy deployments return an empty success body.
       return member.copyWith(
@@ -203,6 +204,6 @@ class CentralApi {
         'Unable to reach ZeroTier Central. Check the internet connection.',
       );
     }
-    return CentralApiException(error.toString());
+    return const CentralApiException('An unexpected error occurred.');
   }
 }

@@ -51,7 +51,7 @@ class _ZeroTierCentralAppState extends State<ZeroTierCentralApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ZeroTier Central',
+      title: 'ZT Central Manager',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: _theme(Brightness.light),

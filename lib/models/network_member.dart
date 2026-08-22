@@ -40,6 +40,43 @@ class NetworkMember {
     );
   }
 
+  /// Applies fields present in a partial Legacy Central response while
+  /// retaining the last known value for fields the server omitted.
+  NetworkMember mergeJson(Map<String, dynamic> json) {
+    final parsed = NetworkMember.fromJson(json);
+    final config = _stringMap(json['config']);
+    return NetworkMember(
+      networkId: json.containsKey('networkId') && parsed.networkId.isNotEmpty
+          ? parsed.networkId
+          : networkId,
+      nodeId:
+          (json.containsKey('nodeId') ||
+                  json.containsKey('id') ||
+                  config.containsKey('id')) &&
+              parsed.nodeId.isNotEmpty
+          ? parsed.nodeId
+          : nodeId,
+      name: json.containsKey('name') ? parsed.name : name,
+      description: json.containsKey('description')
+          ? parsed.description
+          : description,
+      authorized: config.containsKey('authorized')
+          ? parsed.authorized
+          : authorized,
+      zeroTierAddresses: config.containsKey('ipAssignments')
+          ? parsed.zeroTierAddresses
+          : zeroTierAddresses,
+      physicalAddress: json.containsKey('physicalAddress')
+          ? parsed.physicalAddress
+          : physicalAddress,
+      lastSeen: json.containsKey('lastSeen') ? parsed.lastSeen : lastSeen,
+      clientVersion: json.containsKey('clientVersion')
+          ? parsed.clientVersion
+          : clientVersion,
+      hidden: json.containsKey('hidden') ? parsed.hidden : hidden,
+    );
+  }
+
   factory NetworkMember.fromJson(Map<String, dynamic> json) {
     final config = _stringMap(json['config']);
     final lastSeenMilliseconds = _integer(json['lastSeen']);

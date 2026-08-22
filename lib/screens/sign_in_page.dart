@@ -92,14 +92,14 @@ class _SignInPageState extends State<SignInPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'ZeroTier Central',
+                    'ZT Central Manager',
                     style: Theme.of(context).textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Manage members of a Legacy Central account. This app '
-                    'does not run a VPN and does not require root.',
+                    'Manage members of a Legacy Central account. This '
+                    'unofficial app does not run a VPN or require root.',
                     style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),

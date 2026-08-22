@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="ZeroTier Central"
+        android:label="ZT Central Manager"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:roundIcon="@mipmap/launcher_icon"

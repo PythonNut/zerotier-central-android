@@ -1,0 +1,68 @@
+name: Draft release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.1
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze --fatal-infos
+      - run: flutter test
+      - name: Verify tag matches application version
+        run: |
+          APP_VERSION="$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d+ -f1)"
+          test "v$APP_VERSION" = "$GITHUB_REF_NAME"
+      - name: Configure Android signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          test -n "$STORE_PASSWORD"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          printf 'storeFile=%s\n' "$RUNNER_TEMP/release.jks" > android/key.properties
+          printf 'storePassword=%s\n' "$STORE_PASSWORD" >> android/key.properties
+          printf 'keyAlias=%s\n' "$KEY_ALIAS" >> android/key.properties
+          printf 'keyPassword=%s\n' "$KEY_PASSWORD" >> android/key.properties
+      - name: Build signed artifacts
+        run: |
+          flutter build apk --release
+          flutter build appbundle --release
+      - name: Prepare checksums
+        run: |
+          mkdir "$RUNNER_TEMP/release"
+          cp build/app/outputs/flutter-apk/app-release.apk "$RUNNER_TEMP/release/zt-central-manager.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/release/zt-central-manager.aab"
+          cd "$RUNNER_TEMP/release"
+          sha256sum zt-central-manager.apk zt-central-manager.aab > SHA256SUMS
+      - name: Create draft GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME"
+          "$RUNNER_TEMP/release/zt-central-manager.apk"
+          "$RUNNER_TEMP/release/zt-central-manager.aab"
+          "$RUNNER_TEMP/release/SHA256SUMS"
+          --draft --generate-notes --verify-tag
+          --title "ZT Central Manager $GITHUB_REF_NAME"

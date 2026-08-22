@@ -154,7 +154,7 @@ class _NetworkListPageState extends State<NetworkListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ZeroTier Central'),
+        title: const Text('ZT Central Manager'),
         actions: [
           IconButton(
             tooltip: 'Refresh',

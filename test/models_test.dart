@@ -60,6 +60,39 @@ void main() {
       expect(member.authorized, isFalse);
       expect(member.lastSeen, isNull);
     });
+
+    test(
+      'merges partial mutation responses without discarding known fields',
+      () {
+        final member = NetworkMember.fromJson({
+          'networkId': '8056c2e21c000001',
+          'nodeId': 'abcdef0123',
+          'name': 'Old name',
+          'description': 'Desk machine',
+          'physicalAddress': '203.0.113.7/9993',
+          'lastSeen': 1700000000000,
+          'clientVersion': '1.16.2',
+          'config': {
+            'authorized': true,
+            'ipAssignments': ['10.147.19.10'],
+          },
+        });
+
+        final renamed = member.mergeJson({'name': 'New name'});
+        final deauthorized = renamed.mergeJson({
+          'config': {'authorized': false},
+        });
+
+        expect(deauthorized.name, 'New name');
+        expect(deauthorized.authorized, isFalse);
+        expect(deauthorized.networkId, member.networkId);
+        expect(deauthorized.nodeId, member.nodeId);
+        expect(deauthorized.zeroTierAddresses, member.zeroTierAddresses);
+        expect(deauthorized.physicalAddress, member.physicalAddress);
+        expect(deauthorized.lastSeen, member.lastSeen);
+        expect(deauthorized.clientVersion, member.clientVersion);
+      },
+    );
   });
 
   test('account usage deduplicates authorized nodes across networks', () {
