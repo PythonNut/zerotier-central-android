@@ -122,11 +122,31 @@ void main() {
     expect(snapshot.authorizedDeviceCount, 2);
   });
 
-  test('last-seen formatter uses useful relative intervals', () {
+  test('last-seen formatter stays relative across useful intervals', () {
     final now = DateTime(2026, 8, 22, 12);
     expect(
+      formatLastSeen(now.subtract(const Duration(seconds: 20)), now: now),
+      'Just now',
+    );
+    expect(
       formatLastSeen(now.subtract(const Duration(minutes: 8)), now: now),
-      '8 min ago',
+      '8 minutes ago',
+    );
+    expect(
+      formatLastSeen(now.subtract(const Duration(hours: 1)), now: now),
+      '1 hour ago',
+    );
+    expect(
+      formatLastSeen(now.subtract(const Duration(days: 12)), now: now),
+      '12 days ago',
+    );
+    expect(
+      formatLastSeen(now.subtract(const Duration(days: 90)), now: now),
+      '3 months ago',
+    );
+    expect(
+      formatLastSeen(now.subtract(const Duration(days: 800)), now: now),
+      '2 years ago',
     );
     expect(formatLastSeen(null, now: now), 'Never seen');
   });

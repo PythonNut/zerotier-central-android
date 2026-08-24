@@ -1,21 +1,24 @@
-import 'package:intl/intl.dart';
-
 String formatLastSeen(DateTime? value, {DateTime? now}) {
   if (value == null) return 'Never seen';
-  final local = value.toLocal();
-  final difference = (now ?? DateTime.now()).difference(local);
+  final difference = (now ?? DateTime.now()).difference(value.toLocal());
   if (difference.isNegative || difference.inSeconds < 60) return 'Just now';
   if (difference.inMinutes < 60) {
-    return '${difference.inMinutes} min ago';
+    return _ago(difference.inMinutes, 'minute');
   }
   if (difference.inHours < 24) {
-    return '${difference.inHours} hr ago';
+    return _ago(difference.inHours, 'hour');
   }
-  if (difference.inDays < 7) {
-    return '${difference.inDays} days ago';
+  if (difference.inDays < 30) {
+    return _ago(difference.inDays, 'day');
   }
-  return DateFormat.yMMMd().add_jm().format(local);
+  if (difference.inDays < 365) {
+    return _ago(difference.inDays ~/ 30, 'month');
+  }
+  return _ago(difference.inDays ~/ 365, 'year');
 }
+
+String _ago(int amount, String unit) =>
+    '$amount $unit${amount == 1 ? '' : 's'} ago';
 
 String valueOrUnavailable(String value) =>
     value.isEmpty ? 'Unavailable' : value;

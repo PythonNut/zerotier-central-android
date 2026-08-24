@@ -9,4 +9,5 @@
 - Add member authorization, deauthorization, and renaming.
 - Show ZeroTier addresses, last physical address, last-seen time, and client
   version.
+- Keep last-seen values relative for minutes, hours, days, months, and years.
 - Add production-safe signing configuration, CI, and release documentation.
