@@ -56,7 +56,7 @@ Requirements: Flutter 3.47.1 (Dart 3.13.1), Android SDK 37, and JDK 21.
 flutter pub get
 flutter analyze
 flutter test
-flutter build apk --release --target-platform android-arm64
+flutter build apk --release
 ```
 
 Without signing configuration, release builds are intentionally unsigned. For
@@ -68,19 +68,22 @@ Git. Back up the release key securely: updates must be signed with the same key.
 
 Android application ID: `io.github.pythonnut.zerotiercentral`.
 
-### Drafting a release
+### Publishing a release
 
-The tag workflow builds a signed universal APK and an Android App Bundle,
-generates SHA-256 checksums, and creates a draft GitHub release for review. Add
-these Actions secrets before pushing a `v*` tag:
+The simplest release process is to build and sign the universal APK and Android
+App Bundle locally, generate SHA-256 checksums, then attach those three files to
+a GitHub release. This keeps the private signing key off GitHub entirely.
+
+An optional manually dispatched workflow can build the same artifacts after an
+existing release tag has been pushed. To use it, add these Actions secrets:
 
 - `ANDROID_KEYSTORE_BASE64`: Base64-encoded release keystore.
 - `ANDROID_KEYSTORE_PASSWORD`: Keystore password.
 - `ANDROID_KEY_ALIAS`: Signing-key alias.
 - `ANDROID_KEY_PASSWORD`: Signing-key password.
 
-The workflow never uploads the keystore itself. Review the draft artifacts and
-release notes before publishing the release.
+The workflow never uploads the keystore itself and creates a draft for review.
+It does not run automatically when tags are pushed.
 
 ## Contributing
 
