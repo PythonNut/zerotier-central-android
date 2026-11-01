@@ -37,7 +37,7 @@ dependencies:
   dio: ^5.11.0
   flutter_secure_storage: ^11.0.0
   shared_preferences: ^2.5.5
-  url_launcher: ^6.3.2
+  url_launcher: ^6.3.3
 
 dev_dependencies:
   flutter_test:
